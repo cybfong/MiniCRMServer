@@ -74,6 +74,19 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Q: Why are you using Flyway if you're already using JPA/Hibernate?
+             A: I use JPA/Hibernate for ORM and runtime persistence, while Flyway owns schema creation and evolution.
+             Hibernate is configured with ddl-auto=validate so it validates that the entity model matches the Flyway-managed database schema.
+        -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
