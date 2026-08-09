@@ -9,10 +9,10 @@ Mini CRM Server is a Spring Boot 4.1.0 REST API written in Java 21 for managing 
 
 ### Data Model & Entity Relationships
 The application follows a star schema pattern centered on **Customer**:
-- **User**: System users with ADMIN/USER roles. No soft delete.
-- **Customer**: Core entity with soft delete (deleted=false default), audit fields (createdBy/updatedBy), and CustomerStatus enum (ACTIVE/INACTIVE/LEAD)
-- **Contact**: Customers' contacts; belongs to Customer; soft deletable. Multiple contacts per customer.
-- **Note**: Audit logs for customers; tracks createdBy/updatedBy users; multiple notes per customer.
+- **User**: System users with ADMIN/USER roles. No soft delete. Tracked as audit references (createdBy/updatedBy) in Customer and Note.
+- **Customer**: Core entity with soft delete (deleted=false default), audit fields (createdBy/updatedBy as User references), and CustomerStatus enum (ACTIVE/INACTIVE/LEAD)
+- **Contact**: Customers' contacts; belongs to Customer; soft deletable. **No audit fields** (no createdBy/updatedBy). Multiple contacts per customer.
+- **Note**: Audit logs for customers; tracks createdBy/updatedBy users (User references); multiple notes per customer.
 
 **Pattern Reference:** See `src/main/java/com/oji/mini_crm_server/model/` for the complete schema.
 
@@ -47,10 +47,42 @@ public class EntityName {
 **Soft Delete Pattern:** Customer and Contact entities have `deleted` boolean field (default false). Queries must filter `deleted=false`.
 **Audit Fields:** createdBy/updatedBy reference User entity with LAZY loading; createdAt/updatedAt use LocalDateTime.
 
+### JSON Serialization & Circular Reference Prevention
+The application uses Jackson annotations to prevent infinite loops during JSON serialization:
+- **@JsonManagedReference:** Used on the parent side of bidirectional relationships (forwards the reference)
+  - Example: `Customer.@JsonManagedReference("customer-contacts")` on the @OneToMany side
+- **@JsonBackReference:** Used on the child side to suppress serialization (prevents circular reference)
+  - Example: `Contact.@JsonBackReference("customer-contacts")` on the @ManyToOne side
+- **Special case:** User → Customer relationships use both `@JsonManagedReference` and `@JsonBackReference` for audit tracking (createdBy/updatedBy)
+
+**Important:** When serializing parent entities, child collections are included (via JsonManagedReference), but child entities won't include their parent to prevent cycles.
+
 ### Relationship Mappings
-- Customer → Contact: `@OneToMany(mappedBy = "customer")` on Customer side
-- Note → Customer: `@ManyToOne` with `@JoinColumn(name = "customer_id", nullable = false)`
-- Audit relationships: Use nullable `@JoinColumn` (created_by/updated_by can be null if user deleted)
+
+**Complete Entity Relationship Diagram:**
+```
+User ←→ Customer (bidirectional audit)
+  ├─ User.@OneToMany(mappedBy="createdBy") → List<Customer> createdCustomers
+  ├─ User.@OneToMany(mappedBy="updatedBy") → List<Customer> updatedCustomers
+  ├─ Customer.@ManyToOne(fetch=LAZY) → User createdBy [@JoinColumn(name="created_by")]
+  └─ Customer.@ManyToOne(fetch=LAZY) → User updatedBy [@JoinColumn(name="updated_by")]
+
+Customer ←→ Contact (one-to-many)
+  ├─ Customer.@OneToMany(mappedBy="customer") → List<Contact> contacts
+  └─ Contact.@ManyToOne(fetch=LAZY) → Customer customer [@JoinColumn(name="customer_id", nullable=false)]
+
+Customer ←→ Note (one-to-many with audit)
+  ├─ Customer.@OneToMany(mappedBy="customer") → List<Note> notes
+  ├─ Note.@ManyToOne(fetch=LAZY) → Customer customer [@JoinColumn(name="customer_id", nullable=false)]
+  ├─ Note.@ManyToOne(fetch=LAZY) → User createdBy [@JoinColumn(name="created_by")]
+  └─ Note.@ManyToOne(fetch=LAZY) → User updatedBy [@JoinColumn(name="updated_by")]
+```
+
+**Key Details:**
+- All `@ManyToOne` relationships use `fetch = FetchType.LAZY` (prevent N+1 queries)
+- Audit relationships (`created_by`, `updated_by`) use **nullable** `@JoinColumn` (can be NULL if user deleted)
+- **Contact has NO audit fields** (no createdBy/updatedBy); only Customer and Note track audit info
+- JSON serialization uses `@JsonManagedReference` (parent) + `@JsonBackReference` (child) to prevent circular references
 
 ## Development Workflows
 
@@ -133,9 +165,30 @@ Database columns: lowercase_with_underscores; Java fields: camelCase.
 4. For future: Create repository extending JpaRepository for database queries
 
 ### Working with Relationships
-- Customer ↔ Contact & Note: Use `@OneToMany(mappedBy = "customer")` on Customer, `@ManyToOne` on child entities
+
+**Customer-Contact Relationships:**
+- Use `@OneToMany(mappedBy = "customer")` on Customer.contacts
+- Use `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "customer_id", nullable = false)` on Contact.customer
+- Contact has NO audit fields; if tracking is needed, create a Note instead
+- JSON: Parent (Customer) serializes as `@JsonManagedReference`, child (Contact) as `@JsonBackReference`
+
+**Customer-Note Relationships:**
+- Use `@OneToMany(mappedBy = "customer")` on Customer.notes
+- Use `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "customer_id", nullable = false)` on Note.customer
+- Note must track audit info: `Note.createdBy` and `Note.updatedBy` as User references
+- JSON: Parent (Customer) serializes as `@JsonManagedReference`, child (Note) as `@JsonBackReference`
+
+**User-Customer Audit Relationships:**
+- Customer tracks who created/updated it via `createdBy` and `updatedBy` User foreign keys
+- User maintains reverse collections: `@OneToMany(mappedBy = "createdBy")` and `@OneToMany(mappedBy = "updatedBy")`
+- Both sides use nullable `@JoinColumn` to handle deleted users gracefully
+- When querying customers, audit user info is LAZY-loaded; explicitly join if needed in service layer
+
+**General Principles:**
 - Always use `fetch = FetchType.LAZY` to avoid N+1 query problems
-- When querying: explicitly join eager-load if needed in service layer
+- When querying: explicitly use `.join()` in JPQL or Criteria API if parent needs child data
+- Delete operations: Since foreign keys have no CASCADE, deletion must be handled in service code
+- Soft deletes: Filter `deleted = false` at repository query level for Customer and Contact
 
 ### Running Migrations
 - Place `.sql` file in `src/main/resources/db/migration/` with naming V{N}__{description}.sql
@@ -161,4 +214,7 @@ Database columns: lowercase_with_underscores; Java fields: camelCase.
 - **Audit User IDs:** createdBy/updatedBy can be NULL if user account is deleted; handle gracefully in service layer
 - **N+1 Problem:** LAZY fetching requires explicit join or separate queries; always check generated SQL with show-sql=true
 - **Timestamp Initialization:** Must manually set createdAt/updatedAt; no automatic timestamp generation
+- **JSON Circular References:** Always use @JsonManagedReference + @JsonBackReference on bidirectional relationships; missing annotations cause infinite loops
+- **Contact Audit Limitation:** Contact entity has no createdBy/updatedBy fields; if full audit trail needed, create Note records instead
+- **No Cascade Deletes:** Foreign keys don't cascade; deleting User or Customer requires manual deletion of related records in service code
 

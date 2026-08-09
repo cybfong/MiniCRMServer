@@ -1,5 +1,6 @@
 package com.oji.mini_crm_server.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,15 +48,19 @@ public class Customer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
+    @JsonManagedReference("customer-created-by")
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
+    @JsonManagedReference("customer-updated-by")
     private User updatedBy;
 
     @OneToMany(mappedBy = "customer")
+    @JsonManagedReference("customer-contacts")
     private List<Contact> contacts;
 
     @OneToMany(mappedBy = "customer")
+    @JsonManagedReference("customer-notes")
     private List<Note> notes;
 }
