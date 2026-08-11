@@ -47,7 +47,7 @@ public class Customer {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", nullable = false)
     @JsonManagedReference("customer-created-by")
     private User createdBy;
 

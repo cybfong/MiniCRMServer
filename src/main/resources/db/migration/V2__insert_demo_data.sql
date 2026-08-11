@@ -215,3 +215,21 @@ VALUES ('Initial meeting completed. Customer is interested in our enterprise sol
         (SELECT user_id FROM users WHERE user_name = 'john.smith'),
         (SELECT customer_id FROM customers WHERE customer_name = 'Tokyo Trading Co.'),
         (SELECT user_id FROM users WHERE user_name = 'john.smith'));
+
+-- ============================================
+-- USER CREDENTIALS (all passwords_hash values are user_name + "@123" hashed with bcrypt 12 rounds)
+-- ============================================
+
+INSERT INTO user_credentials (user_id, password_hash, created_at, updated_at)
+VALUES ((SELECT user_id FROM users WHERE user_name = 'admin'),
+        '$2a$12$A71aRVXRWjE3pDB4FeINuO94z9cx.5S3oDHs3hI10XyPOcTM0qcPG',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP),
+       ((SELECT user_id FROM users WHERE user_name = 'john.smith'),
+        '$2a$12$t6e8BXoAFn8nvJVQWEHRzeogbEHO8I/BqA6vav6PMv2SzpIr371lq',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP),
+       ((SELECT user_id FROM users WHERE user_name = 'mary.wong'),
+        '$2a$12$cw97pC.IGTsQKL5T.jSZ7e6ir/0DpU3Q74fcPMFVFQGYqUMSwzWoe',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP);

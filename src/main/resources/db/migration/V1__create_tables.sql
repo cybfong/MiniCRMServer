@@ -29,7 +29,7 @@ CREATE TABLE customers
     updated_at    TIMESTAMP(6) NOT NULL,
     website       VARCHAR(255),
 
-    created_by    BIGINT,
+    created_by    BIGINT       NOT NULL,
     updated_by    BIGINT,
 
     CONSTRAINT customers_status_check CHECK (status IN ('ACTIVE', 'INACTIVE', 'LEAD')),
@@ -65,7 +65,7 @@ CREATE TABLE notes
     note_text   TEXT         NOT NULL,
     updated_at  TIMESTAMP(6) NOT NULL,
 
-    created_by  BIGINT,
+    created_by  BIGINT       NOT NULL,
     customer_id BIGINT       NOT NULL,
     updated_by  BIGINT,
 
