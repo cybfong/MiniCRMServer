@@ -2,7 +2,6 @@ package com.oji.mini_crm_server.controller;
 
 import com.oji.mini_crm_server.model.Customer;
 import com.oji.mini_crm_server.service.CustomerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,9 +10,11 @@ import java.util.List;
 
 @RestController
 public class CustomerController {
+    private final CustomerService customerService;
 
-    @Autowired
-    private CustomerService customerService;
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
 
     @GetMapping("/api/customers")
     public List<Customer> getCustomers() {

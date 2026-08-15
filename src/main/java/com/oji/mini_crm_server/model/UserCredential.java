@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "user_credentials")
 public class UserCredential {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "credential_id")
