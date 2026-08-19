@@ -1,6 +1,6 @@
 package com.oji.mini_crm_server.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,10 +42,10 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "createdBy")
-    @JsonBackReference("customer-created-by")
+    @JsonIgnore
     private List<Customer> createdCustomers;
 
     @OneToMany(mappedBy = "updatedBy")
-    @JsonBackReference("customer-updated-by")
+    @JsonIgnore
     private List<Customer> updatedCustomers;
 }

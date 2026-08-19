@@ -48,12 +48,10 @@ public class Customer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
-    @JsonManagedReference("customer-created-by")
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
-    @JsonManagedReference("customer-updated-by")
     private User updatedBy;
 
     @OneToMany(mappedBy = "customer")
