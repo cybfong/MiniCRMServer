@@ -1,6 +1,5 @@
 package com.oji.mini_crm_server.service;
 
-
 import com.oji.mini_crm_server.model.User;
 import com.oji.mini_crm_server.repo.UserRepository;
 import org.springframework.security.core.Authentication;

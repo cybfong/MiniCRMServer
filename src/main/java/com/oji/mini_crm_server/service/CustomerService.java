@@ -3,8 +3,8 @@ package com.oji.mini_crm_server.service;
 import com.oji.mini_crm_server.model.Customer;
 import com.oji.mini_crm_server.model.User;
 import com.oji.mini_crm_server.repo.CustomerRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,13 +31,9 @@ public class CustomerService {
 
     @Transactional
     public Customer createCustomer(Customer customer) {
-        if (customerRepository
-                .existsByCustomerNameAndDeletedFalse(
-                        customer.getCustomerName())) {
+        if (customerRepository.existsByCustomerNameAndDeletedFalse(customer.getCustomerName())) {
 
-            throw new RuntimeException(
-                    "Customer already exists: "
-                            + customer.getCustomerName());
+            throw new RuntimeException("Customer already exists: " + customer.getCustomerName());
         }
 
         User currentUser = currentUserService.getCurrentUser();
@@ -47,6 +43,8 @@ public class CustomerService {
         LocalDateTime now = LocalDateTime.now();
         customer.setCreatedAt(now);
         customer.setUpdatedAt(now);
+
+        customer.setDeleted(false);
 
         return customerRepository.save(customer);
     }
