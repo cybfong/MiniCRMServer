@@ -187,34 +187,39 @@ INSERT INTO notes (note_text,
                    updated_at,
                    created_by,
                    customer_id,
-                   updated_by)
+                   updated_by,
+                   deleted)
 VALUES ('Initial meeting completed. Customer is interested in our enterprise solution.',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
         (SELECT user_id FROM users WHERE user_name = 'john.smith'),
         (SELECT customer_id FROM customers WHERE customer_name = 'Acme Corporation'),
-        (SELECT user_id FROM users WHERE user_name = 'john.smith')),
+        (SELECT user_id FROM users WHERE user_name = 'john.smith'),
+        false),
 
        ('Technical requirements document has been requested from the customer.',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
         (SELECT user_id FROM users WHERE user_name = 'john.smith'),
         (SELECT customer_id FROM customers WHERE customer_name = 'Acme Corporation'),
-        (SELECT user_id FROM users WHERE user_name = 'john.smith')),
+        (SELECT user_id FROM users WHERE user_name = 'john.smith'),
+        false),
 
        ('Customer requested a product demonstration next month.',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
         (SELECT user_id FROM users WHERE user_name = 'mary.wong'),
         (SELECT customer_id FROM customers WHERE customer_name = 'Global Finance Ltd'),
-        (SELECT user_id FROM users WHERE user_name = 'mary.wong')),
+        (SELECT user_id FROM users WHERE user_name = 'mary.wong'),
+        false),
 
        ('Potential new customer. Follow-up call required.',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
         (SELECT user_id FROM users WHERE user_name = 'john.smith'),
         (SELECT customer_id FROM customers WHERE customer_name = 'Tokyo Trading Co.'),
-        (SELECT user_id FROM users WHERE user_name = 'john.smith'));
+        (SELECT user_id FROM users WHERE user_name = 'john.smith'),
+        false);
 
 -- ============================================
 -- USER CREDENTIALS (all passwords_hash values are user_name + "@123" hashed with bcrypt 12 rounds)

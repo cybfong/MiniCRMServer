@@ -68,6 +68,7 @@ CREATE TABLE notes
     created_by  BIGINT       NOT NULL,
     customer_id BIGINT       NOT NULL,
     updated_by  BIGINT,
+    deleted     BOOLEAN      NOT NULL,
 
     CONSTRAINT fk_note_created_by FOREIGN KEY (created_by) REFERENCES users (user_id),
 

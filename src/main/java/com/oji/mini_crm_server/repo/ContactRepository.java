@@ -10,11 +10,8 @@ import java.util.Optional;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long> {
     List<Contact> findByDeletedFalse();
-
     Optional<Contact> findByDeletedFalseAndId(Long contactId);
 
     boolean existsByEmailAndDeletedFalse(String email);
-
     boolean existsByEmailAndDeletedFalseAndIdNot(String email, Long contactId);
-
 }

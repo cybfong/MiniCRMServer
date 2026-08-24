@@ -39,5 +39,4 @@ public class ContactController {
     public String deleteContact(@PathVariable("contactId") Long contactId) {
         return contactService.deleteContact(contactId) ? "Contact deleted successfully" : "Contact not found";
     }
-
 }

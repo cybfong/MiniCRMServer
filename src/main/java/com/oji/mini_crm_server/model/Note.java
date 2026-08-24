@@ -38,4 +38,7 @@ public class Note {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private User updatedBy;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 }

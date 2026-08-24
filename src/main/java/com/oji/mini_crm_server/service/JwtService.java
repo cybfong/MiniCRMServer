@@ -28,7 +28,7 @@ public class JwtService {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
-            System.out.println("Generated Secret Key: " + secretKey.toString());
+            // System.out.println("Generated Secret Key: " + secretKey.toString());
             return Base64.getEncoder().encodeToString(secretKey.getEncoded());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error generating secret key", e);
