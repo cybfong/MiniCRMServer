@@ -1,0 +1,17 @@
+This file was moved out of the active test suite.
+
+Reason: The project currently runs unit-style tests and some developers may not have Docker available
+in their environment. The original Testcontainers-based integration test has been disabled by
+renaming/moving the file so it won't be compiled. If you want to re-enable integration tests, restore
+the original Java test file at:
+
+  src/test/java/com/oji/mini_crm_server/repo/CustomerRepositoryIT.java
+
+and ensure Docker is available on the machine that runs the tests (or run the integration tests only on CI
+with Docker). You can use Testcontainers + @DataJpaTest + @DynamicPropertySource to wire the container's
+JDBC URL into Spring's test context.
+
+Note: This is a non-Java file to avoid compilation by the test-compiler.
+
+
+
