@@ -8,9 +8,7 @@ import com.oji.mini_crm_server.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class UserController {
@@ -40,5 +38,10 @@ public class UserController {
         } else {
             return "Login fail";
         }
+    }
+
+    @GetMapping("/api/user/{userName}")
+    public User getUserByName(@PathVariable("userName") String userName) {
+        return userService.getUser(userName);
     }
 }

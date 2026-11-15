@@ -69,4 +69,8 @@ public class UserService {
         // 6. Return the created user
         return user;
     }
+
+    public User getUser(String userName) {
+        return userRepository.findByUserName(userName).orElseThrow(() -> new RuntimeException("User not found : " + userName));
+    }
 }

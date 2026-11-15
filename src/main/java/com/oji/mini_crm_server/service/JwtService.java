@@ -24,6 +24,9 @@ public class JwtService {
         secretKey = generateSecretKey();
     }
 
+    // valid for X minutes
+    private static final int TOKEN_EXPIRATION_TIME = 1000 * 60 * 60;
+
     public String generateSecretKey() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
@@ -37,7 +40,7 @@ public class JwtService {
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder().claims(claims).subject(username).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // valid for 60 minutes
+        return Jwts.builder().claims(claims).subject(username).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
                 .signWith(getKey()).compact();
     }
 
